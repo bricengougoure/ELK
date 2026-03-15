@@ -1,0 +1,45 @@
+apt -y install filebeat
+
+# ============================================================
+# FILEBEAT - Configuration SIEM
+# ============================================================
+
+filebeat.inputs:
+  # Collecte des logs d'authentification SSH
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/syslog
+      - /var/log/secure
+    fields:
+      log_type: "ssh"
+      environment: "production"
+    fields_under_root: true
+
+  # Collecte des logs Nginx
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/nginx/access.log
+      - /var/log/nginx/error.log
+    fields:
+      log_type: "nginx"
+    fields_under_root: true
+
+  # Collecte des logs système
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/syslog
+    fields:
+      log_type: "syslog"
+    fields_under_root: true
+
+# Envoi vers Logstash
+output.logstash:
+  hosts: ["logstash-server:5044"]
+  ssl.enabled: false
+
+# Désactiver l'envoi direct vers Elasticsearch
+# output.elasticsearch:
+#   hosts: ["https://localhost:9200"]
